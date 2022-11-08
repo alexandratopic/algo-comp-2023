@@ -65,48 +65,65 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     print("proposers", proposers, "receivers", receivers)
   
     
+    # Some man is free and hasn’t proposed to every woman do
     while any(item in proposers for item in unmatched):
+        # Choose such a man
         proposee = proposers.pop()
-        receiver = 0
+
+        # This person has proposed to everyone
+        if len(proposed[proposee]) == len(receivers):
+            unmatched.remove(proposee)
+            continuem
+        receiver = 10
         for j in range(len(scores[proposee])):
-            if scores[proposee][j] != 0 and j not in proposed[proposee]: 
+            # First person proposee is compatible with that they haven't proposed to
+            # if scores[proposee][j] != 0 and j not in proposed[proposee]: 
+            if j != proposee and j not in proposed[proposee] and j in receivers: 
                 receiver = j
                 break
-        
+        # Proposee isn't compatible with anyone
+        if receiver == 10:
+            unmatched.remove(proposee)
+            continue
         # if w if free, match m and w
         if receiver not in matched:
             matched[proposee] = receiver
             matched[receiver] = proposee
+            print(unmatched, proposee, receiver)
+            unmatched.remove(proposee)
             unmatched.remove(receiver)
-            continue
+            proposed[proposee].append(receiver)
         # if w prefers m to her current match m' then free up m'
-        elif scores[receiver][matched[receiver]] > scores[receiver][proposee]:
+        elif scores[receiver][proposee] > scores[receiver][matched[receiver]]:
+            unmatched.append(matched[receiver])
+            proposers.insert(0, matched[receiver])
             matched[receiver] = proposee
             matched[proposee] = receiver
             # free up current match
-            matched[matched[receiver]] = 0
-            unmatched.append(matched[receiver])
+            # matched[matched[receiver]] = 10
+            print(unmatched, proposee, receiver)
             unmatched.remove(proposee)
+            proposed[proposee].append(receiver)
         else:
             # w rejects m
             proposed[proposee].append(receiver)
-            proposers.append(proposee)
-    
+            proposers.insert(0, proposee)
     print(matched)
+    matching = []
     for i in range(len(matched)):
         if matched[i] == 10:
             continue
         else:
+            if (min(i, matched[i]), max(i, matched[i])) not in matching:
+                matching.append((min(i, matched[i]), max(i, matched[i])))
             print(i, matched[i], genders[i], gender_pref[i], genders[matched[i]], gender_pref[matched[i]])
     
-    print(gender[ ])
 
     
     
                 
+    # if someone is nonbinary make them match with any preference
         
-
-
 
     """
     TODO: Implement Gale-Shapley stable matching!
@@ -132,7 +149,8 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     # proposers = random half
     # other half of users
     # receivers = 
-    matches = [()]
+    matches = matching
+    print(matches)
     return matches
 
 if __name__ == "__main__":
