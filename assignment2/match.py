@@ -33,8 +33,6 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     # Edit Ranking
     for i in range(len(scores)):
         changeArr(scores[i])
-    # print(gender_pref)
-    print(scores)
     
     # Set Gender Preferences for Incompatible Ranking
     for i in range(len(scores)):        
@@ -44,25 +42,28 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
             if gender_pref[i] == "Men" and genders[j] == "Female":
                 scores[i][j] = 0
                 scores[j][i] = 0
-                print(gender_pref[i], genders[j])
             if gender_pref[i] =="Women" and genders[j] == "Male":
                 scores[i][j] = 0
                 scores[j][i] = 0
             # if Bisexual, can be matched with anyone
 
-    proposed = [[], [], [], [], [], [], [], [], [], [], []]
+    proposed = [[]] * len(scores)
     # intialize everyone to be free
     unmatched = []
     for i in range(len(scores)):
         unmatched.append(i)
-    print(unmatched)
-    matched = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    proposers = random.sample(range(0, 10), 5)
+
+    randint = 123456789
+    matched = [randint] * 10
+
+    # Generate proposers randomly
+    proposers = random.sample(range(0, len(scores)), (len(scores) // 2))
+    print('proposers', proposers)
+
     receivers = []
     for i in range(len(scores)):
         if i not in proposers:
             receivers.append(i)
-    print("proposers", proposers, "receivers", receivers)
   
     
     # Some man is free and hasn’t proposed to every woman do
@@ -74,22 +75,22 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
         if len(proposed[proposee]) == len(receivers):
             unmatched.remove(proposee)
             continuem
-        receiver = 10
+        receiver = randint
+        max_score = 0
         for j in range(len(scores[proposee])):
             # First person proposee is compatible with that they haven't proposed to
-            # if scores[proposee][j] != 0 and j not in proposed[proposee]: 
             if j != proposee and j not in proposed[proposee] and j in receivers: 
-                receiver = j
-                break
+                if max(scores[proposee][j], max_score) == scores[proposee][j]:
+                    receiver = j
+                    max_score = scores[proposee][j]
         # Proposee isn't compatible with anyone
-        if receiver == 10:
+        if receiver == randint:
             unmatched.remove(proposee)
             continue
         # if w if free, match m and w
         if receiver not in matched:
             matched[proposee] = receiver
             matched[receiver] = proposee
-            print(unmatched, proposee, receiver)
             unmatched.remove(proposee)
             unmatched.remove(receiver)
             proposed[proposee].append(receiver)
@@ -100,24 +101,25 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
             matched[receiver] = proposee
             matched[proposee] = receiver
             # free up current match
-            # matched[matched[receiver]] = 10
-            print(unmatched, proposee, receiver)
             unmatched.remove(proposee)
             proposed[proposee].append(receiver)
         else:
             # w rejects m
             proposed[proposee].append(receiver)
             proposers.insert(0, proposee)
-    print(matched)
+    
     matching = []
     for i in range(len(matched)):
-        if matched[i] == 10:
+        if matched[i] == randint:
             continue
         else:
             if (min(i, matched[i]), max(i, matched[i])) not in matching:
                 matching.append((min(i, matched[i]), max(i, matched[i])))
             print(i, matched[i], genders[i], gender_pref[i], genders[matched[i]], gender_pref[matched[i]])
     
+    for i in range(len(matching)):
+        if matching[i][0] in receivers:
+            matching[i] = (matching[i][1], matching[i][0])
 
     
     
@@ -150,6 +152,7 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     # other half of users
     # receivers = 
     matches = matching
+    print(receivers)
     print(matches)
     return matches
 
